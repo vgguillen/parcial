@@ -1,5 +1,6 @@
 package com.example.parcial;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
@@ -26,6 +27,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import WebServices.*;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -40,6 +44,10 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.api.services.vision.v1.model.LocationInfo;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.text.FirebaseVisionText;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextDetector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,6 +95,36 @@ public class ActInicial extends AppCompatActivity {
         if (requestCode == REQUEST_GALLERY && resultCode == RESULT_OK) {
             imageUri = data.getData();
             startActivity(new Intent(this, RecognizeGallery.class).putExtra("imageUri", imageUri.toString()));
+        }
+    }
+    private void detectarTextodeImagen() {
+        FirebaseVisionImage firebaseVisionImage = FirebaseVisionImage.fromBitmap(imgBitmap);
+        FirebaseVisionTextDetector firebaseVisionTextDetector = FirebaseVision.getInstance().getVisionTextDetector();
+
+        firebaseVisionTextDetector.detectInImage(firebaseVisionImage).addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
+            @Override
+            public void onSuccess(FirebaseVisionText firebaseVisionText) {
+                textoImagen(firebaseVisionText);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ActInicial.this, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d("Error: " , e.getMessage());
+            }
+        });
+    }
+
+    private void textoImagen(FirebaseVisionText firebaseVisionText) {
+        List<FirebaseVisionText.Block> blockList = firebaseVisionText.getBlocks();
+        if (blockList.size() == 0){
+            Toast.makeText(this, "No se a encontrado texto en la imagen", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            for (FirebaseVisionText.Block block : firebaseVisionText.getBlocks()){
+                String texto = block.getText();
+                txtresult.append("\n"+texto);
+            }
         }
     }
 

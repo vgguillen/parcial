@@ -18,6 +18,14 @@
         android:layout_x="0dp"
         android:layout_y="157dp"
         tools:context=".MapsActivity" />
+    <ImageView
+        android:id="@+id/imgFotoPais"
+        android:layout_width="243dp"
+        android:layout_height="127dp"
+        android:layout_x="147dp"
+        android:layout_y="19dp"
+        map:srcCompat="@color/black" />
+
     <TextView
         android:id="@+id/txtNombrePais"
         android:layout_width="132dp"
